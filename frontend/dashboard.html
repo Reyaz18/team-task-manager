@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Dashboard - Team Task Manager</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 min-h-screen">
+
+  <!-- Navbar -->
+  <nav class="bg-blue-600 text-white px-6 py-4 flex justify-between items-center shadow">
+    <h1 class="text-xl font-bold">Team Task Manager</h1>
+    <div class="flex items-center gap-4">
+      <span id="user-name" class="text-sm"></span>
+      <span id="user-role" class="text-xs bg-white text-blue-600 px-2 py-1 rounded font-semibold"></span>
+      <button onclick="logout()" class="bg-white text-blue-600 px-3 py-1 rounded text-sm font-semibold hover:bg-gray-100">Logout</button>
+    </div>
+  </nav>
+
+  <div class="max-w-6xl mx-auto p-6">
+
+    <!-- Stats Cards -->
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+      <div class="bg-white rounded-xl p-4 shadow text-center">
+        <p class="text-3xl font-bold text-blue-600" id="stat-total">0</p>
+        <p class="text-gray-500 text-sm mt-1">Total Tasks</p>
+      </div>
+      <div class="bg-white rounded-xl p-4 shadow text-center">
+        <p class="text-3xl font-bold text-yellow-500" id="stat-inprogress">0</p>
+        <p class="text-gray-500 text-sm mt-1">In Progress</p>
+      </div>
+      <div class="bg-white rounded-xl p-4 shadow text-center">
+        <p class="text-3xl font-bold text-green-500" id="stat-done">0</p>
+        <p class="text-gray-500 text-sm mt-1">Completed</p>
+      </div>
+      <div class="bg-white rounded-xl p-4 shadow text-center">
+        <p class="text-3xl font-bold text-red-500" id="stat-overdue">0</p>
+        <p class="text-gray-500 text-sm mt-1">Overdue</p>
+      </div>
+    </div>
+
+    <!-- Projects Section -->
+    <div class="flex justify-between items-center mb-4">
+      <h2 class="text-xl font-bold text-gray-700">Projects</h2>
+      <button id="create-project-btn" onclick="showCreateProject()" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 text-sm font-semibold hidden">+ New Project</button>
+    </div>
+
+    <!-- Create Project Form (Admin Only) -->
+    <div id="create-project-form" class="bg-white rounded-xl p-4 shadow mb-6 hidden">
+      <h3 class="font-semibold mb-3 text-gray-700">Create New Project</h3>
+      <input id="proj-name" type="text" placeholder="Project Name" class="w-full border p-2 rounded mb-2"/>
+      <textarea id="proj-desc" placeholder="Description" class="w-full border p-2 rounded mb-2 h-20"></textarea>
+      <div class="flex gap-2">
+        <button onclick="createProject()" class="bg-green-600 text-white px-4 py-2 rounded text-sm hover:bg-green-700">Create</button>
+        <button onclick="hideCreateProject()" class="bg-gray-300 text-gray-700 px-4 py-2 rounded text-sm hover:bg-gray-400">Cancel</button>
+      </div>
+    </div>
+
+    <div id="projects-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
+      <p class="text-gray-400 col-span-3">Loading projects...</p>
+    </div>
+
+    <!-- Tasks Section -->
+    <div class="flex justify-between items-center mb-4">
+      <h2 class="text-xl font-bold text-gray-700">My Tasks</h2>
+      <button id="create-task-btn" onclick="showCreateTask()" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 text-sm font-semibold hidden">+ New Task</button>
+    </div>
+
+    <!-- Filter -->
+    <div class="flex gap-2 mb-4">
+      <button onclick="filterTasks('')" class="px-3 py-1 bg-blue-100 text-blue-700 rounded text-sm font-semibold">All</button>
+      <button onclick="filterTasks('Todo')" class="px-3 py-1 bg-gray-100 text-gray-700 rounded text-sm">Todo</button>
+      <button onclick="filterTasks('In Progress')" class="px-3 py-1 bg-yellow-100 text-yellow-700 rounded text-sm">In Progress</button>
+      <button onclick="filterTasks('Done')" class="px-3 py-1 bg-green-100 text-green-700 rounded text-sm">Done</button>
+    </div>
+
+    <div id="tasks-list" class="space-y-3">
+      <p class="text-gray-400">Loading tasks...</p>
+    </div>
+  </div>
+
+  <script src="js/dashboard.js"></script>
+</body>
+</html>
