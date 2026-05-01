@@ -1,4 +1,4 @@
-const API = 'http://localhost:5000/api';
+const API = 'https://team-task-manager-production-218d.up.railway.app/api';
 
 function showTab(tab) {
   document.getElementById('login-form').classList.toggle('hidden', tab !== 'login');
