@@ -1,0 +1,138 @@
+const API = 'https://team-task-manager-production-218d.up.railway.app/api';
+const token = localStorage.getItem('token');
+const user = JSON.parse(localStorage.getItem('user') || '{}');
+
+if (!token) window.location.href = 'index.html';
+
+document.getElementById('user-name').textContent = user.name || '';
+document.getElementById('user-role').textContent = user.role || '';
+
+if (user.role === 'Admin') {
+  document.getElementById('create-project-btn').classList.remove('hidden');
+  document.getElementById('create-task-btn').classList.remove('hidden');
+}
+
+function logout() {
+  localStorage.clear();
+  window.location.href = 'index.html';
+}
+
+const headers = { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` };
+
+// Load Stats
+async function loadStats() {
+  const res = await fetch(`${API}/tasks/stats/dashboard`, { headers });
+  const data = await res.json();
+  document.getElementById('stat-total').textContent = data.total || 0;
+  document.getElementById('stat-inprogress').textContent = data.inProgress || 0;
+  document.getElementById('stat-done').textContent = data.done || 0;
+  document.getElementById('stat-overdue').textContent = data.overdue || 0;
+}
+
+// Load Projects
+async function loadProjects() {
+  const res = await fetch(`${API}/projects`, { headers });
+  const projects = await res.json();
+  const container = document.getElementById('projects-list');
+  if (!projects.length) {
+    container.innerHTML = '<p class="text-gray-400 col-span-3">No projects yet.</p>';
+    return;
+  }
+  container.innerHTML = projects.map(p => `
+    <div class="bg-white rounded-xl p-4 shadow hover:shadow-md transition cursor-pointer" onclick="filterTasks('', '${p._id}')">
+      <h3 class="font-bold text-gray-800">${p.name}</h3>
+      <p class="text-gray-500 text-sm mt-1">${p.description || 'No description'}</p>
+      <p class="text-xs text-gray-400 mt-2">By: ${p.createdBy?.name || 'Unknown'}</p>
+      <p class="text-xs text-gray-400">Members: ${p.members?.length || 0}</p>
+    </div>
+  `).join('');
+}
+
+// Load Tasks
+let allTasks = [];
+async function loadTasks(status = '', projectId = '') {
+  let url = `${API}/tasks?`;
+  if (status) url += `status=${encodeURIComponent(status)}&`;
+  if (projectId) url += `project=${projectId}`;
+  const res = await fetch(url, { headers });
+  allTasks = await res.json();
+  renderTasks(allTasks);
+}
+
+function renderTasks(tasks) {
+  const container = document.getElementById('tasks-list');
+  if (!tasks.length) {
+    container.innerHTML = '<p class="text-gray-400">No tasks found.</p>';
+    return;
+  }
+  const statusColors = { 'Todo': 'bg-gray-100 text-gray-700', 'In Progress': 'bg-yellow-100 text-yellow-700', 'Done': 'bg-green-100 text-green-700' };
+  const priorityColors = { 'Low': 'text-green-500', 'Medium': 'text-yellow-500', 'High': 'text-red-500' };
+
+  container.innerHTML = tasks.map(t => `
+    <div class="bg-white rounded-xl p-4 shadow flex justify-between items-start">
+      <div>
+        <h3 class="font-semibold text-gray-800">${t.title}</h3>
+        <p class="text-gray-500 text-sm">${t.description || ''}</p>
+        <div class="flex gap-2 mt-2 flex-wrap">
+          <span class="text-xs px-2 py-1 rounded ${statusColors[t.status] || ''}">${t.status}</span>
+          <span class="text-xs font-semibold ${priorityColors[t.priority] || ''}">⬆ ${t.priority}</span>
+          ${t.dueDate ? `<span class="text-xs text-gray-400">Due: ${new Date(t.dueDate).toLocaleDateString()}</span>` : ''}
+          ${t.assignedTo ? `<span class="text-xs text-blue-500">👤 ${t.assignedTo.name}</span>` : ''}
+          ${t.project ? `<span class="text-xs text-purple-500">📁 ${t.project.name}</span>` : ''}
+        </div>
+      </div>
+      <div class="flex flex-col gap-1 ml-4">
+        ${user.role === 'Member' ? `
+          <select onchange="updateTaskStatus('${t._id}', this.value)" class="text-xs border rounded p-1">
+            <option ${t.status==='Todo'?'selected':''}>Todo</option>
+            <option ${t.status==='In Progress'?'selected':''}>In Progress</option>
+            <option ${t.status==='Done'?'selected':''}>Done</option>
+          </select>
+        ` : `
+          <button onclick="deleteTask('${t._id}')" class="text-xs text-red-500 hover:underline">Delete</button>
+        `}
+      </div>
+    </div>
+  `).join('');
+}
+
+function filterTasks(status, projectId = '') {
+  loadTasks(status, projectId);
+}
+
+async function updateTaskStatus(id, status) {
+  await fetch(`${API}/tasks/${id}`, {
+    method: 'PUT', headers,
+    body: JSON.stringify({ status })
+  });
+  loadTasks();
+  loadStats();
+}
+
+async function deleteTask(id) {
+  if (!confirm('Delete this task?')) return;
+  await fetch(`${API}/tasks/${id}`, { method: 'DELETE', headers });
+  loadTasks();
+  loadStats();
+}
+
+// Create Project
+function showCreateProject() { document.getElementById('create-project-form').classList.remove('hidden'); }
+function hideCreateProject() { document.getElementById('create-project-form').classList.add('hidden'); }
+
+async function createProject() {
+  const name = document.getElementById('proj-name').value;
+  const description = document.getElementById('proj-desc').value;
+  if (!name) return alert('Project name required');
+  await fetch(`${API}/projects`, {
+    method: 'POST', headers,
+    body: JSON.stringify({ name, description })
+  });
+  hideCreateProject();
+  loadProjects();
+}
+
+// Init
+loadStats();
+loadProjects();
+loadTasks();

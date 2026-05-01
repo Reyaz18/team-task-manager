@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Team Task Manager - Login</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 min-h-screen flex items-center justify-center">
+  <div class="bg-white p-8 rounded-xl shadow-md w-full max-w-md">
+    <h1 class="text-2xl font-bold text-center text-blue-600 mb-6">Team Task Manager</h1>
+
+    <!-- Tabs -->
+    <div class="flex mb-6 border-b">
+      <button onclick="showTab('login')" id="tab-login" class="flex-1 py-2 font-semibold text-blue-600 border-b-2 border-blue-600">Login</button>
+      <button onclick="showTab('signup')" id="tab-signup" class="flex-1 py-2 font-semibold text-gray-400">Signup</button>
+    </div>
+
+    <!-- Login Form -->
+    <div id="login-form">
+      <input id="login-email" type="email" placeholder="Email" class="w-full border p-2 rounded mb-3 focus:outline-none focus:ring-2 focus:ring-blue-400"/>
+      <input id="login-password" type="password" placeholder="Password" class="w-full border p-2 rounded mb-4 focus:outline-none focus:ring-2 focus:ring-blue-400"/>
+      <button onclick="login()" class="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 font-semibold">Login</button>
+    </div>
+
+    <!-- Signup Form -->
+    <div id="signup-form" class="hidden">
+      <input id="signup-name" type="text" placeholder="Full Name" class="w-full border p-2 rounded mb-3 focus:outline-none focus:ring-2 focus:ring-blue-400"/>
+      <input id="signup-email" type="email" placeholder="Email" class="w-full border p-2 rounded mb-3 focus:outline-none focus:ring-2 focus:ring-blue-400"/>
+      <input id="signup-password" type="password" placeholder="Password" class="w-full border p-2 rounded mb-3 focus:outline-none focus:ring-2 focus:ring-blue-400"/>
+      <select id="signup-role" class="w-full border p-2 rounded mb-4 focus:outline-none focus:ring-2 focus:ring-blue-400">
+        <option value="Member">Member</option>
+        <option value="Admin">Admin</option>
+      </select>
+      <button onclick="signup()" class="w-full bg-green-600 text-white py-2 rounded hover:bg-green-700 font-semibold">Signup</button>
+    </div>
+
+    <p id="msg" class="text-center mt-3 text-sm text-red-500"></p>
+  </div>
+
+  <script src="js/auth.js"></script>
+</body>
+</html>
