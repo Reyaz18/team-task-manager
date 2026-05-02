@@ -1,43 +1,100 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Team Task Manager - Login</title>
+  <title>Dashboard - Team Task Manager</title>
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-gray-100 min-h-screen flex items-center justify-center">
-  <div class="bg-white p-8 rounded-xl shadow-md w-full max-w-md">
-    <h1 class="text-2xl font-bold text-center text-blue-600 mb-6">Team Task Manager</h1>
+<body class="bg-gray-100 min-h-screen">
 
-    <!-- Tabs -->
-    <div class="flex mb-6 border-b">
-      <button onclick="showTab('login')" id="tab-login" class="flex-1 py-2 font-semibold text-blue-600 border-b-2 border-blue-600">Login</button>
-      <button onclick="showTab('signup')" id="tab-signup" class="flex-1 py-2 font-semibold text-gray-400">Signup</button>
+  <nav class="bg-blue-600 text-white px-6 py-4 flex justify-between items-center shadow">
+    <h1 class="text-xl font-bold">Team Task Manager</h1>
+    <div class="flex items-center gap-4">
+      <span id="user-name" class="text-sm"></span>
+      <span id="user-role" class="text-xs bg-white text-blue-600 px-2 py-1 rounded font-semibold"></span>
+      <button onclick="logout()" class="bg-white text-blue-600 px-3 py-1 rounded text-sm font-semibold hover:bg-gray-100">Logout</button>
+    </div>
+  </nav>
+
+  <div class="max-w-6xl mx-auto p-6">
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+      <div class="bg-white rounded-xl p-4 shadow text-center">
+        <p class="text-3xl font-bold text-blue-600" id="stat-total">0</p>
+        <p class="text-gray-500 text-sm mt-1">Total Tasks</p>
+      </div>
+      <div class="bg-white rounded-xl p-4 shadow text-center">
+        <p class="text-3xl font-bold text-yellow-500" id="stat-inprogress">0</p>
+        <p class="text-gray-500 text-sm mt-1">In Progress</p>
+      </div>
+      <div class="bg-white rounded-xl p-4 shadow text-center">
+        <p class="text-3xl font-bold text-green-500" id="stat-done">0</p>
+        <p class="text-gray-500 text-sm mt-1">Completed</p>
+      </div>
+      <div class="bg-white rounded-xl p-4 shadow text-center">
+        <p class="text-3xl font-bold text-red-500" id="stat-overdue">0</p>
+        <p class="text-gray-500 text-sm mt-1">Overdue</p>
+      </div>
     </div>
 
-    <!-- Login Form -->
-    <div id="login-form">
-      <input id="login-email" type="email" placeholder="Email" class="w-full border p-2 rounded mb-3 focus:outline-none focus:ring-2 focus:ring-blue-400"/>
-      <input id="login-password" type="password" placeholder="Password" class="w-full border p-2 rounded mb-4 focus:outline-none focus:ring-2 focus:ring-blue-400"/>
-      <button onclick="login()" class="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 font-semibold">Login</button>
+    <div class="flex justify-between items-center mb-4">
+      <h2 class="text-xl font-bold text-gray-700">Projects</h2>
+      <button id="create-project-btn" onclick="showCreateProject()" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 text-sm font-semibold hidden">+ New Project</button>
     </div>
 
-    <!-- Signup Form -->
-    <div id="signup-form" class="hidden">
-      <input id="signup-name" type="text" placeholder="Full Name" class="w-full border p-2 rounded mb-3 focus:outline-none focus:ring-2 focus:ring-blue-400"/>
-      <input id="signup-email" type="email" placeholder="Email" class="w-full border p-2 rounded mb-3 focus:outline-none focus:ring-2 focus:ring-blue-400"/>
-      <input id="signup-password" type="password" placeholder="Password" class="w-full border p-2 rounded mb-3 focus:outline-none focus:ring-2 focus:ring-blue-400"/>
-      <select id="signup-role" class="w-full border p-2 rounded mb-4 focus:outline-none focus:ring-2 focus:ring-blue-400">
-        <option value="Member">Member</option>
-        <option value="Admin">Admin</option>
-      </select>
-      <button onclick="signup()" class="w-full bg-green-600 text-white py-2 rounded hover:bg-green-700 font-semibold">Signup</button>
+    <div id="create-project-form" class="bg-white rounded-xl p-4 shadow mb-6 hidden">
+      <h3 class="font-semibold mb-3 text-gray-700">Create New Project</h3>
+      <input id="proj-name" type="text" placeholder="Project Name" class="w-full border p-2 rounded mb-2"/>
+      <textarea id="proj-desc" placeholder="Description" class="w-full border p-2 rounded mb-2 h-20"></textarea>
+      <input id="proj-members" type="text" placeholder="Member IDs (comma separated) - optional" class="w-full border p-2 rounded mb-2"/>
+      <p class="text-xs text-gray-400 mb-3">Member ID kaise milega: Member browser mein F12 → Console → type: JSON.parse(localStorage.getItem('user')).id</p>
+      <div class="flex gap-2">
+        <button onclick="createProject()" class="bg-green-600 text-white px-4 py-2 rounded text-sm hover:bg-green-700">Create</button>
+        <button onclick="hideCreateProject()" class="bg-gray-300 text-gray-700 px-4 py-2 rounded text-sm hover:bg-gray-400">Cancel</button>
+      </div>
     </div>
 
-    <p id="msg" class="text-center mt-3 text-sm text-red-500"></p>
+    <div id="projects-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
+      <p class="text-gray-400 col-span-3">Loading projects...</p>
+    </div>
+
+    <div class="flex justify-between items-center mb-4">
+      <h2 class="text-xl font-bold text-gray-700">My Tasks</h2>
+      <button id="create-task-btn" onclick="showCreateTask()" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 text-sm font-semibold hidden">+ New Task</button>
+    </div>
+
+    <div id="create-task-form" class="bg-white rounded-xl p-4 shadow mb-6 hidden">
+      <h3 class="font-semibold mb-3 text-gray-700">Create New Task</h3>
+      <input id="task-title" type="text" placeholder="Task Title" class="w-full border p-2 rounded mb-2"/>
+      <textarea id="task-desc" placeholder="Description" class="w-full border p-2 rounded mb-2 h-16"></textarea>
+      <div class="grid grid-cols-2 gap-2 mb-2">
+        <select id="task-priority" class="border p-2 rounded">
+          <option value="Low">Low Priority</option>
+          <option value="Medium" selected>Medium Priority</option>
+          <option value="High">High Priority</option>
+        </select>
+        <input id="task-due" type="date" class="border p-2 rounded"/>
+      </div>
+      <input id="task-project" type="text" placeholder="Project ID (copy from project card)" class="w-full border p-2 rounded mb-2"/>
+      <input id="task-assigned" type="text" placeholder="Assign to Member ID (optional)" class="w-full border p-2 rounded mb-3"/>
+      <div class="flex gap-2">
+        <button onclick="createTask()" class="bg-green-600 text-white px-4 py-2 rounded text-sm hover:bg-green-700">Create Task</button>
+        <button onclick="hideCreateTask()" class="bg-gray-300 text-gray-700 px-4 py-2 rounded text-sm hover:bg-gray-400">Cancel</button>
+      </div>
+    </div>
+
+    <div class="flex gap-2 mb-4">
+      <button onclick="filterTasks('')" class="px-3 py-1 bg-blue-100 text-blue-700 rounded text-sm font-semibold">All</button>
+      <button onclick="filterTasks('Todo')" class="px-3 py-1 bg-gray-100 text-gray-700 rounded text-sm">Todo</button>
+      <button onclick="filterTasks('In Progress')" class="px-3 py-1 bg-yellow-100 text-yellow-700 rounded text-sm">In Progress</button>
+      <button onclick="filterTasks('Done')" class="px-3 py-1 bg-green-100 text-green-700 rounded text-sm">Done</button>
+    </div>
+
+    <div id="tasks-list" class="space-y-3">
+      <p class="text-gray-400">Loading tasks...</p>
+    </div>
   </div>
 
-  <script src="js/auth.js"></script>
+  <script src="js/dashboard.js"></script>
 </body>
 </html>
