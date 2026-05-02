@@ -16,29 +16,48 @@ function logout() { localStorage.clear(); window.location.href = 'index.html'; }
 
 const headers = { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` };
 
+let allProjects = [];
+
 async function loadStats() {
-  const res = await fetch(`${API}/tasks/stats/dashboard`, { headers });
-  const data = await res.json();
-  document.getElementById('stat-total').textContent = data.total || 0;
-  document.getElementById('stat-inprogress').textContent = data.inProgress || 0;
-  document.getElementById('stat-done').textContent = data.done || 0;
-  document.getElementById('stat-overdue').textContent = data.overdue || 0;
+  try {
+    const res = await fetch(`${API}/tasks/stats/dashboard`, { headers });
+    const data = await res.json();
+    document.getElementById('stat-total').textContent = data.total || 0;
+    document.getElementById('stat-inprogress').textContent = data.inProgress || 0;
+    document.getElementById('stat-done').textContent = data.done || 0;
+    document.getElementById('stat-overdue').textContent = data.overdue || 0;
+  } catch(e) {}
 }
 
 async function loadProjects() {
   const res = await fetch(`${API}/projects`, { headers });
-  const projects = await res.json();
+  allProjects = await res.json();
   const container = document.getElementById('projects-list');
-  if (!projects.length) { container.innerHTML = '<p class="text-gray-400 col-span-3">No projects yet.</p>'; return; }
-  container.innerHTML = projects.map(p => `
-    <div class="bg-white rounded-xl p-4 shadow hover:shadow-md transition cursor-pointer" onclick="filterTasks('', '${p._id}')">
-      <h3 class="font-bold text-gray-800">${p.name}</h3>
-      <p class="text-gray-500 text-sm mt-1">${p.description || 'No description'}</p>
-      <p class="text-xs text-gray-400 mt-2">By: ${p.createdBy?.name || 'Unknown'}</p>
-      <p class="text-xs text-gray-400">Members: ${p.members?.length || 0}</p>
-      <p class="text-xs text-blue-400 mt-1 break-all">ID: ${p._id}</p>
+  if (!allProjects.length) {
+    container.innerHTML = '<p class="text-gray-400 col-span-3">No projects yet.</p>';
+    return;
+  }
+  container.innerHTML = allProjects.map(p => `
+    <div class="bg-white rounded-xl p-4 shadow hover:shadow-md transition">
+      <div class="flex justify-between items-start">
+        <div class="cursor-pointer flex-1" onclick="filterTasks('', '${p._id}')">
+          <h3 class="font-bold text-gray-800">${p.name}</h3>
+          <p class="text-gray-500 text-sm mt-1">${p.description || 'No description'}</p>
+          <p class="text-xs text-gray-400 mt-2">By: ${p.createdBy?.name || 'Unknown'}</p>
+          <p class="text-xs text-gray-400">Members: ${p.members?.length || 0}</p>
+        </div>
+        ${user.role === 'Admin' ? `
+          <button onclick="deleteProject('${p._id}')" class="text-xs text-red-500 hover:underline ml-2 mt-1">Delete</button>
+        ` : ''}
+      </div>
     </div>
   `).join('');
+}
+
+async function deleteProject(id) {
+  if (!confirm('Delete this project?')) return;
+  await fetch(`${API}/projects/${id}`, { method: 'DELETE', headers });
+  loadProjects();
 }
 
 async function loadTasks(status = '', projectId = '') {
@@ -115,7 +134,12 @@ async function createProject() {
   loadProjects();
 }
 
-function showCreateTask() { document.getElementById('create-task-form').classList.remove('hidden'); }
+function showCreateTask() {
+  document.getElementById('create-task-form').classList.remove('hidden');
+  const projSelect = document.getElementById('task-project-select');
+  projSelect.innerHTML = '<option value="">-- Select Project --</option>' +
+    allProjects.map(p => `<option value="${p._id}">${p.name}</option>`).join('');
+}
 function hideCreateTask() { document.getElementById('create-task-form').classList.add('hidden'); }
 
 async function createTask() {
@@ -123,9 +147,10 @@ async function createTask() {
   const description = document.getElementById('task-desc').value;
   const priority = document.getElementById('task-priority').value;
   const dueDate = document.getElementById('task-due').value;
-  const project = document.getElementById('task-project').value;
-  const assignedTo = document.getElementById('task-assigned').value;
-  if (!title || !project) return alert('Title and Project ID required');
+  const project = document.getElementById('task-project-select').value;
+  const assignedTo = document.getElementById('task-assigned').value.trim();
+  if (!title) return alert('Task title required');
+  if (!project) return alert('Please select a project');
   const body = { title, description, priority, project };
   if (dueDate) body.dueDate = dueDate;
   if (assignedTo) body.assignedTo = assignedTo;
@@ -133,6 +158,9 @@ async function createTask() {
   const data = await res.json();
   if (!res.ok) return alert(data.message);
   hideCreateTask();
+  document.getElementById('task-title').value = '';
+  document.getElementById('task-desc').value = '';
+  document.getElementById('task-assigned').value = '';
   loadTasks(); loadStats();
 }
 

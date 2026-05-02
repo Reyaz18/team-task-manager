@@ -7,7 +7,6 @@
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-gray-100 min-h-screen">
-
   <nav class="bg-blue-600 text-white px-6 py-4 flex justify-between items-center shadow">
     <h1 class="text-xl font-bold">Team Task Manager</h1>
     <div class="flex items-center gap-4">
@@ -16,7 +15,6 @@
       <button onclick="logout()" class="bg-white text-blue-600 px-3 py-1 rounded text-sm font-semibold hover:bg-gray-100">Logout</button>
     </div>
   </nav>
-
   <div class="max-w-6xl mx-auto p-6">
     <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
       <div class="bg-white rounded-xl p-4 shadow text-center">
@@ -36,33 +34,28 @@
         <p class="text-gray-500 text-sm mt-1">Overdue</p>
       </div>
     </div>
-
     <div class="flex justify-between items-center mb-4">
       <h2 class="text-xl font-bold text-gray-700">Projects</h2>
       <button id="create-project-btn" onclick="showCreateProject()" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 text-sm font-semibold hidden">+ New Project</button>
     </div>
-
     <div id="create-project-form" class="bg-white rounded-xl p-4 shadow mb-6 hidden">
       <h3 class="font-semibold mb-3 text-gray-700">Create New Project</h3>
       <input id="proj-name" type="text" placeholder="Project Name" class="w-full border p-2 rounded mb-2"/>
       <textarea id="proj-desc" placeholder="Description" class="w-full border p-2 rounded mb-2 h-20"></textarea>
       <input id="proj-members" type="text" placeholder="Member IDs (comma separated) - optional" class="w-full border p-2 rounded mb-2"/>
-      <p class="text-xs text-gray-400 mb-3">Member ID kaise milega: Member browser mein F12 → Console → type: JSON.parse(localStorage.getItem('user')).id</p>
+      <p class="text-xs text-gray-400 mb-3">Member ID: F12 → Console → JSON.parse(localStorage.getItem('user')).id</p>
       <div class="flex gap-2">
         <button onclick="createProject()" class="bg-green-600 text-white px-4 py-2 rounded text-sm hover:bg-green-700">Create</button>
         <button onclick="hideCreateProject()" class="bg-gray-300 text-gray-700 px-4 py-2 rounded text-sm hover:bg-gray-400">Cancel</button>
       </div>
     </div>
-
     <div id="projects-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
       <p class="text-gray-400 col-span-3">Loading projects...</p>
     </div>
-
     <div class="flex justify-between items-center mb-4">
       <h2 class="text-xl font-bold text-gray-700">My Tasks</h2>
       <button id="create-task-btn" onclick="showCreateTask()" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 text-sm font-semibold hidden">+ New Task</button>
     </div>
-
     <div id="create-task-form" class="bg-white rounded-xl p-4 shadow mb-6 hidden">
       <h3 class="font-semibold mb-3 text-gray-700">Create New Task</h3>
       <input id="task-title" type="text" placeholder="Task Title" class="w-full border p-2 rounded mb-2"/>
@@ -75,26 +68,25 @@
         </select>
         <input id="task-due" type="date" class="border p-2 rounded"/>
       </div>
-      <input id="task-project" type="text" placeholder="Project ID (copy from project card)" class="w-full border p-2 rounded mb-2"/>
+      <select id="task-project-select" class="w-full border p-2 rounded mb-2">
+        <option value="">-- Select Project --</option>
+      </select>
       <input id="task-assigned" type="text" placeholder="Assign to Member ID (optional)" class="w-full border p-2 rounded mb-3"/>
       <div class="flex gap-2">
         <button onclick="createTask()" class="bg-green-600 text-white px-4 py-2 rounded text-sm hover:bg-green-700">Create Task</button>
         <button onclick="hideCreateTask()" class="bg-gray-300 text-gray-700 px-4 py-2 rounded text-sm hover:bg-gray-400">Cancel</button>
       </div>
     </div>
-
     <div class="flex gap-2 mb-4">
       <button onclick="filterTasks('')" class="px-3 py-1 bg-blue-100 text-blue-700 rounded text-sm font-semibold">All</button>
       <button onclick="filterTasks('Todo')" class="px-3 py-1 bg-gray-100 text-gray-700 rounded text-sm">Todo</button>
       <button onclick="filterTasks('In Progress')" class="px-3 py-1 bg-yellow-100 text-yellow-700 rounded text-sm">In Progress</button>
       <button onclick="filterTasks('Done')" class="px-3 py-1 bg-green-100 text-green-700 rounded text-sm">Done</button>
     </div>
-
     <div id="tasks-list" class="space-y-3">
       <p class="text-gray-400">Loading tasks...</p>
     </div>
   </div>
-
   <script src="js/dashboard.js"></script>
 </body>
 </html>
