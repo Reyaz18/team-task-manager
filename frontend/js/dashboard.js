@@ -12,10 +12,7 @@ if (user.role === 'Admin') {
   document.getElementById('create-task-btn').classList.remove('hidden');
 }
 
-function logout() {
-  localStorage.clear();
-  window.location.href = 'index.html';
-}
+function logout() { localStorage.clear(); window.location.href = 'index.html'; }
 
 const headers = { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` };
 
@@ -32,10 +29,7 @@ async function loadProjects() {
   const res = await fetch(`${API}/projects`, { headers });
   const projects = await res.json();
   const container = document.getElementById('projects-list');
-  if (!projects.length) {
-    container.innerHTML = '<p class="text-gray-400 col-span-3">No projects yet.</p>';
-    return;
-  }
+  if (!projects.length) { container.innerHTML = '<p class="text-gray-400 col-span-3">No projects yet.</p>'; return; }
   container.innerHTML = projects.map(p => `
     <div class="bg-white rounded-xl p-4 shadow hover:shadow-md transition cursor-pointer" onclick="filterTasks('', '${p._id}')">
       <h3 class="font-bold text-gray-800">${p.name}</h3>
@@ -58,10 +52,7 @@ async function loadTasks(status = '', projectId = '') {
 
 function renderTasks(tasks) {
   const container = document.getElementById('tasks-list');
-  if (!tasks.length) {
-    container.innerHTML = '<p class="text-gray-400">No tasks found.</p>';
-    return;
-  }
+  if (!tasks.length) { container.innerHTML = '<p class="text-gray-400">No tasks found.</p>'; return; }
   const statusColors = { 'Todo': 'bg-gray-100 text-gray-700', 'In Progress': 'bg-yellow-100 text-yellow-700', 'Done': 'bg-green-100 text-green-700' };
   const priorityColors = { 'Low': 'text-green-500', 'Medium': 'text-yellow-500', 'High': 'text-red-500' };
   container.innerHTML = tasks.map(t => `
@@ -114,10 +105,7 @@ async function createProject() {
   const membersInput = document.getElementById('proj-members').value;
   const members = membersInput ? membersInput.split(',').map(id => id.trim()).filter(id => id) : [];
   if (!name) return alert('Project name required');
-  const res = await fetch(`${API}/projects`, {
-    method: 'POST', headers,
-    body: JSON.stringify({ name, description, members })
-  });
+  const res = await fetch(`${API}/projects`, { method: 'POST', headers, body: JSON.stringify({ name, description, members }) });
   const data = await res.json();
   if (!res.ok) return alert(data.message);
   hideCreateProject();
@@ -141,10 +129,7 @@ async function createTask() {
   const body = { title, description, priority, project };
   if (dueDate) body.dueDate = dueDate;
   if (assignedTo) body.assignedTo = assignedTo;
-  const res = await fetch(`${API}/tasks`, {
-    method: 'POST', headers,
-    body: JSON.stringify(body)
-  });
+  const res = await fetch(`${API}/tasks`, { method: 'POST', headers, body: JSON.stringify(body) });
   const data = await res.json();
   if (!res.ok) return alert(data.message);
   hideCreateTask();
