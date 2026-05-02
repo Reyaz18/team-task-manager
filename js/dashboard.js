@@ -12,14 +12,10 @@ if (user.role === 'Admin') {
   document.getElementById('create-task-btn').classList.remove('hidden');
 }
 
-function logout() {
-  localStorage.clear();
-  window.location.href = 'index.html';
-}
+function logout() { localStorage.clear(); window.location.href = 'index.html'; }
 
 const headers = { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` };
 
-// Load Stats
 async function loadStats() {
   const res = await fetch(`${API}/tasks/stats/dashboard`, { headers });
   const data = await res.json();
@@ -29,45 +25,36 @@ async function loadStats() {
   document.getElementById('stat-overdue').textContent = data.overdue || 0;
 }
 
-// Load Projects
 async function loadProjects() {
   const res = await fetch(`${API}/projects`, { headers });
   const projects = await res.json();
   const container = document.getElementById('projects-list');
-  if (!projects.length) {
-    container.innerHTML = '<p class="text-gray-400 col-span-3">No projects yet.</p>';
-    return;
-  }
+  if (!projects.length) { container.innerHTML = '<p class="text-gray-400 col-span-3">No projects yet.</p>'; return; }
   container.innerHTML = projects.map(p => `
     <div class="bg-white rounded-xl p-4 shadow hover:shadow-md transition cursor-pointer" onclick="filterTasks('', '${p._id}')">
       <h3 class="font-bold text-gray-800">${p.name}</h3>
       <p class="text-gray-500 text-sm mt-1">${p.description || 'No description'}</p>
       <p class="text-xs text-gray-400 mt-2">By: ${p.createdBy?.name || 'Unknown'}</p>
       <p class="text-xs text-gray-400">Members: ${p.members?.length || 0}</p>
+      <p class="text-xs text-blue-400 mt-1 break-all">ID: ${p._id}</p>
     </div>
   `).join('');
 }
 
-// Load Tasks
-let allTasks = [];
 async function loadTasks(status = '', projectId = '') {
   let url = `${API}/tasks?`;
   if (status) url += `status=${encodeURIComponent(status)}&`;
   if (projectId) url += `project=${projectId}`;
   const res = await fetch(url, { headers });
-  allTasks = await res.json();
-  renderTasks(allTasks);
+  const tasks = await res.json();
+  renderTasks(tasks);
 }
 
 function renderTasks(tasks) {
   const container = document.getElementById('tasks-list');
-  if (!tasks.length) {
-    container.innerHTML = '<p class="text-gray-400">No tasks found.</p>';
-    return;
-  }
+  if (!tasks.length) { container.innerHTML = '<p class="text-gray-400">No tasks found.</p>'; return; }
   const statusColors = { 'Todo': 'bg-gray-100 text-gray-700', 'In Progress': 'bg-yellow-100 text-yellow-700', 'Done': 'bg-green-100 text-green-700' };
   const priorityColors = { 'Low': 'text-green-500', 'Medium': 'text-yellow-500', 'High': 'text-red-500' };
-
   container.innerHTML = tasks.map(t => `
     <div class="bg-white rounded-xl p-4 shadow flex justify-between items-start">
       <div>
@@ -96,43 +83,59 @@ function renderTasks(tasks) {
   `).join('');
 }
 
-function filterTasks(status, projectId = '') {
-  loadTasks(status, projectId);
-}
+function filterTasks(status, projectId = '') { loadTasks(status, projectId); }
 
 async function updateTaskStatus(id, status) {
-  await fetch(`${API}/tasks/${id}`, {
-    method: 'PUT', headers,
-    body: JSON.stringify({ status })
-  });
-  loadTasks();
-  loadStats();
+  await fetch(`${API}/tasks/${id}`, { method: 'PUT', headers, body: JSON.stringify({ status }) });
+  loadTasks(); loadStats();
 }
 
 async function deleteTask(id) {
   if (!confirm('Delete this task?')) return;
   await fetch(`${API}/tasks/${id}`, { method: 'DELETE', headers });
-  loadTasks();
-  loadStats();
+  loadTasks(); loadStats();
 }
 
-// Create Project
 function showCreateProject() { document.getElementById('create-project-form').classList.remove('hidden'); }
 function hideCreateProject() { document.getElementById('create-project-form').classList.add('hidden'); }
 
 async function createProject() {
   const name = document.getElementById('proj-name').value;
   const description = document.getElementById('proj-desc').value;
+  const membersInput = document.getElementById('proj-members').value;
+  const members = membersInput ? membersInput.split(',').map(id => id.trim()).filter(id => id) : [];
   if (!name) return alert('Project name required');
-  await fetch(`${API}/projects`, {
-    method: 'POST', headers,
-    body: JSON.stringify({ name, description })
-  });
+  const res = await fetch(`${API}/projects`, { method: 'POST', headers, body: JSON.stringify({ name, description, members }) });
+  const data = await res.json();
+  if (!res.ok) return alert(data.message);
   hideCreateProject();
+  document.getElementById('proj-name').value = '';
+  document.getElementById('proj-desc').value = '';
+  document.getElementById('proj-members').value = '';
   loadProjects();
 }
 
-// Init
+function showCreateTask() { document.getElementById('create-task-form').classList.remove('hidden'); }
+function hideCreateTask() { document.getElementById('create-task-form').classList.add('hidden'); }
+
+async function createTask() {
+  const title = document.getElementById('task-title').value;
+  const description = document.getElementById('task-desc').value;
+  const priority = document.getElementById('task-priority').value;
+  const dueDate = document.getElementById('task-due').value;
+  const project = document.getElementById('task-project').value;
+  const assignedTo = document.getElementById('task-assigned').value;
+  if (!title || !project) return alert('Title and Project ID required');
+  const body = { title, description, priority, project };
+  if (dueDate) body.dueDate = dueDate;
+  if (assignedTo) body.assignedTo = assignedTo;
+  const res = await fetch(`${API}/tasks`, { method: 'POST', headers, body: JSON.stringify(body) });
+  const data = await res.json();
+  if (!res.ok) return alert(data.message);
+  hideCreateTask();
+  loadTasks(); loadStats();
+}
+
 loadStats();
 loadProjects();
 loadTasks();
